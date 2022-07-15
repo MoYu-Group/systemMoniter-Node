@@ -15,7 +15,7 @@ type NodeData struct {
 	Custom   string `form:"custom" json:"custom" xml:"custom" `
 }
 
-func setNode(nodeData *NodeData) error {
+func SetNode(nodeData *NodeData) error {
 	name := viper.GetString("node.name")
 	nodeType := viper.GetString("node.type")
 	host := viper.GetString("node.host")

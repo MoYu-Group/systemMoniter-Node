@@ -1,15 +1,24 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"systemMoniter-Node/common"
 	"systemMoniter-Node/logger"
 	"systemMoniter-Node/models"
 	"systemMoniter-Node/settings"
 	"time"
 
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
+
+var errCode int
+var errMsg string
+var token string
 
 func main() {
 	//设置东八中文时区
@@ -26,11 +35,11 @@ func main() {
 		return
 	}
 	defer zap.L().Sync()
-	Start()
-	zap.L().Info("Successful exiting")
-}
-
-func Start() {
+	interval := viper.GetInt("sendInterval")
+	if interval <= 0 {
+		zap.L().Error("Send Status interval config error")
+		return
+	}
 	basic := common.NewBasic()
 	basic.Start()
 	defer basic.Stop()
@@ -49,6 +58,133 @@ func Start() {
 		defer p189.Stop()
 		p189.RunCT()
 	}
+	Login()
+	if errCode == 0 && errMsg == "" && token != "" {
+		SendStatus()
+	} else {
+		zap.L().Error("Get auth token error, exiting now")
+		return
+	}
+	ticker := time.NewTicker(time.Duration(interval) * time.Minute)
+	for range ticker.C {
+	StartHere:
+		if (errCode == 20201 || errMsg == "ErrValidation") || (errCode == 20203 && errMsg == "ErrTokenExpired") {
+			Login()
+			goto StartHere
+		} else if errCode != 0 && errMsg != "" {
+			return
+		}
+		SendStatus()
+	}
+	zap.L().Info("Successful exiting")
+}
+
+func SendStatus() {
+	//token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5vZGUiLCJleHAiOjE2NTc4ODQ5MzgsImlhdCI6MTY1Nzg3NDEzOCwibmJmIjoxNjU3ODc0MTM4fQ.0zKRliyhLa8ZrXJ63-1UlMmRq80hI4scSoIJcMZn0ww"
+	nodeData := models.NodeData{}
+	err := models.SetNode(&nodeData)
+	if err != nil {
+		zap.L().Error(err.Error())
+		return
+	}
+	status := models.Status{}
+	SetStatus(&status, &nodeData)
+	body, err := json.Marshal(status)
+	if err != nil {
+		zap.L().Error(err.Error())
+		return
+	}
+	url := viper.GetString("url")
+	saveStatusAPI := viper.GetString("api.saveStatus")
+	if url == "" || saveStatusAPI == "" {
+		zap.L().Error("Lost API URL config")
+		return
+	}
+	req, err := http.NewRequest("POST", url+saveStatusAPI, bytes.NewBuffer(body))
+	req.Header.Set("Authorization", token)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		zap.L().Error(err.Error())
+		return
+	}
+	defer resp.Body.Close()
+	body, err2 := ioutil.ReadAll(resp.Body)
+	if err2 != nil {
+		zap.L().Error(err2.Error())
+		return
+	}
+	var saveStatusResponse interface{}
+	err = json.Unmarshal(body, &saveStatusResponse)
+	if err != nil {
+		zap.L().Error(err2.Error())
+		return
+	}
+	jsonData := saveStatusResponse.(map[string]interface{})
+	errCode = int(jsonData["error"].(float64))
+	errMsg = jsonData["error_msg"].(string)
+	if (errCode == 20201 || errMsg == "ErrValidation") || (errCode == 20203 && errMsg == "ErrTokenExpired") {
+		zap.L().Error("Token Validation Error: " + errMsg)
+		token = ""
+		return
+	} else if errCode != 0 && errMsg != "" {
+		zap.L().Error("Save node status failed, error: " + errMsg)
+		return
+	}
+	data := jsonData["data"].(map[string]interface{})
+	id := data["id"].(string)
+	zap.L().Info("Save node status successful, status id: " + id)
+}
+
+func Login() {
+	zap.L().Info("Start to login")
+	loginUser := models.LoginUser{}
+	err := models.SetLoginUser(&loginUser)
+	if err != nil {
+		return
+	}
+	body, err := json.Marshal(loginUser)
+	if err != nil {
+		zap.L().Error(err.Error())
+		return
+	}
+	url := viper.GetString("url")
+	loginAPI := viper.GetString("api.login")
+	if url == "" || loginAPI == "" {
+		zap.L().Error("Lost API URL config")
+		return
+	}
+	resp, err := http.Post(url+loginAPI, "application/json",
+		bytes.NewBuffer(body))
+	if err != nil {
+		zap.L().Error(err.Error())
+		return
+	}
+	body, err2 := ioutil.ReadAll(resp.Body)
+	if err2 != nil {
+		zap.L().Error(err2.Error())
+		return
+	}
+	var loginUserResponse interface{}
+	err = json.Unmarshal(body, &loginUserResponse)
+	if err != nil {
+		zap.L().Error(err2.Error())
+		return
+	}
+	jsonData := loginUserResponse.(map[string]interface{})
+	errCode = int(jsonData["error"].(float64))
+	errMsg = jsonData["error_msg"].(string)
+
+	if errCode != 0 && errMsg != "" {
+		zap.L().Error("Login failed, error: " + errMsg)
+		token = ""
+		return
+	}
+	data := jsonData["data"].(map[string]interface{})
+	token = data["token"].(string)
+	zap.L().Info("Login successful, token: " + token)
 }
 
 func SetStatus(status *models.Status, nodeData *models.NodeData) {

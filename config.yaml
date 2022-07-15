@@ -1,16 +1,16 @@
 name: "systemMoniter-Node" #姓名
 mode: "dev" #模式
-url : "http://127.0.0.1:8085/api"
+url: "http://127.0.0.1:8085/api"
 api:
-  login:"/user/login"
-  saveStatus:"/node/saveStatus"
+  login: "/user/login"
+  saveStatus: "/node/saveStatus"
 log:
   level: "debug" #日志文件的位置
   filename: "systemMoniter-Node_app.log" #文件名字
   max_size: 200 #在进行切割之前，日志文件的最大大小（以MB为单位）
   max_age: 30 #保留旧文件的最大天数
   max_backups: 7 #保留旧文件的最大个数
-sendInterval: 10 #储存采样速度，分钟
+sendInterval: 1 #储存采样速度，分钟
 network: # 服务器端三网 ping 测试
   cu: "120.52.99.224"
   ct: "183.78.182.66"

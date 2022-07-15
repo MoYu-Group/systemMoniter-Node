@@ -26,6 +26,16 @@ type Ping struct {
 }
 
 func NewPing() *Ping {
+	PingValue.Ping10010 = 0
+	PingValue.Ping10086 = 0
+	PingValue.Ping189 = 0
+	PingValue.Time10010 = 0
+	PingValue.Time10086 = 0
+	PingValue.Time189 = 0
+	PingValue.Status10010 = 0
+	PingValue.Status10086 = 0
+	PingValue.Status189 = 0
+	PingValue.IpStatus = false
 	return &Ping{
 		stop: make(chan struct{}),
 	}
@@ -41,6 +51,7 @@ func (ping *Ping) RunCU() {
 	go func() {
 		t1 := time.Duration(models.Interval) * time.Second
 		t := time.NewTicker(t1)
+
 		var lostPacket = 0
 		var allPacket = 0
 		var lostConnect = false
