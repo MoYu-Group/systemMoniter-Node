@@ -90,7 +90,7 @@ func main() {
 		zap.L().Error("Get auth token error, exiting now")
 		return
 	}
-	ticker := time.NewTicker(time.Duration(interval) * time.Minute)
+	ticker := time.NewTicker(time.Duration(interval) * time.Second)
 	for range ticker.C {
 	StartHere:
 		if (errCode == 20201 && errMsg == "ErrValidation") || (errCode == 20203 && errMsg == "ErrTokenExpired") {
@@ -235,7 +235,7 @@ func SetStatus(status *models.Status, nodeData *models.NodeData) {
 	status.Time189 = common.PingValue.Time189
 	status.TCPCount = common.GetBasic.TCP
 	status.UDPCount = common.GetBasic.UDP
-	status.CPUCount = common.GetBasic.CPU
+	status.CPU = common.GetBasic.CPU
 	status.MemoryTotal = common.GetBasic.MemoryTotal
 	status.MemoryUsed = common.GetBasic.MemoryUsed
 	status.SwapTotal = common.GetBasic.SwapTotal

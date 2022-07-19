@@ -94,7 +94,7 @@ func (ping *Ping) RunCU() {
 				//fmt.Println("ALL     LOST    RATE")
 				//fmt.Printf("%10d  %10d %10f\n",allPacket,lostPacket,pingValue.lostRate)
 				if lostConnect {
-					pingValue = 100
+					pingValue = 0
 					status = 1
 				} else {
 					pingValue = uint64(diffTime / time.Millisecond)
@@ -166,7 +166,7 @@ func (ping *Ping) RunCT() {
 				//fmt.Println("ALL     LOST    RATE")
 				//fmt.Printf("%10d  %10d %10f\n",allPacket,lostPacket,pingValue.lostRate)
 				if lostConnect {
-					pingValue = 100
+					pingValue = 0
 					status = 1
 				} else {
 					pingValue = uint64(diffTime / time.Millisecond)
@@ -238,7 +238,7 @@ func (ping *Ping) RunCM() {
 				//fmt.Println("ALL     LOST    RATE")
 				//fmt.Printf("%10d  %10d %10f\n",allPacket,lostPacket,pingValue.lostRate)
 				if lostConnect {
-					pingValue = 100
+					pingValue = 0
 					status = 1
 				} else {
 					pingValue = uint64(diffTime / time.Millisecond)

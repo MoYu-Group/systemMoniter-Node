@@ -26,7 +26,7 @@ type Status struct {
 	Time189      uint64  `json:"time_189"`
 	TCPCount     uint64  `json:"tcp_count"`
 	UDPCount     uint64  `json:"udp_count"`
-	CPUCount     float64 `json:"cpu_count"`
+	CPU          float64 `json:"cpu"`
 	MemoryTotal  uint64  `json:"memory_total"`
 	MemoryUsed   uint64  `json:"memory_used"`
 	SwapTotal    uint64  `json:"swap_total"`
@@ -61,7 +61,7 @@ func NewDefaultStatus() Status {
 		Time189:      0,
 		TCPCount:     0,
 		UDPCount:     0,
-		CPUCount:     0.0,
+		CPU:          0.0,
 		MemoryTotal:  0,
 		MemoryUsed:   0,
 		SwapTotal:    0,
