@@ -2,6 +2,7 @@ package common
 
 import (
 	"net"
+	"strconv"
 	"sync"
 	"systemMoniter-Node/models"
 	"time"
@@ -68,7 +69,8 @@ func (ping *Ping) RunCU() {
 			case <-t.C:
 				ping.mtx.Lock()
 				t := time.Now()
-				conn, err := net.DialTimeout("tcp", models.Cu, defaulttimeout)
+				url := models.Cu + ":" + strconv.Itoa(models.Porbeport)
+				conn, err := net.DialTimeout("tcp", url, defaulttimeout)
 				if err != nil {
 					//zap.L().Error("Error try to connect China Unicom :", zap.Error(err))
 					//fmt.Println(time.Now().Format("2006-01-02 15:04:05")," [ping]Error try to connect China unicom :", err)
@@ -139,7 +141,8 @@ func (ping *Ping) RunCT() {
 			case <-t.C:
 				ping.mtx.Lock()
 				t := time.Now()
-				conn, err := net.DialTimeout("tcp", models.Ct, defaulttimeout)
+				url := models.Ct + ":" + strconv.Itoa(models.Porbeport)
+				conn, err := net.DialTimeout("tcp", url, defaulttimeout)
 				if err != nil {
 					//zap.L().Error("Error try to connect China telecom :", zap.Error(err))
 					//fmt.Println(time.Now().Format("2006-01-02 15:04:05")," [ping]Error try to connect China unicom :", err)
@@ -210,7 +213,8 @@ func (ping *Ping) RunCM() {
 			case <-t.C:
 				ping.mtx.Lock()
 				t := time.Now()
-				conn, err := net.DialTimeout("tcp", models.Cm, defaulttimeout)
+				url := models.Cm + ":" + strconv.Itoa(models.Porbeport)
+				conn, err := net.DialTimeout("tcp", url, defaulttimeout)
 				if err != nil {
 					//zap.L().Error("Error try to connect China mobile :", zap.Error(err))
 					//fmt.Println(time.Now().Format("2006-01-02 15:04:05")," [ping]Error try to connect China unicom :", err)

@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"systemMoniter-Node/common"
 	"systemMoniter-Node/logger"
 	"systemMoniter-Node/models"
@@ -19,6 +22,30 @@ import (
 var errCode int
 var errMsg string
 var token string
+
+func SetupCloseHandler() {
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		zap.L().Info("Signal stop received,stop client program.")
+		//fmt.Println(time.Now().Format("2006-01-02 15:04:05")," [main] Ctrl+C pressed in Terminal,Stop client program")
+		basic.Stop()
+		netSpeed.Stop()
+		if models.IsOpen != true {
+			p10086.Stop()
+			p10010.Stop()
+			p189.Stop()
+		}
+		os.Exit(0)
+	}()
+}
+
+var basic *common.Basic
+var netSpeed *common.NetSpeed
+var p10010 *common.Ping
+var p189 *common.Ping
+var p10086 *common.Ping
 
 func main() {
 	//设置东八中文时区
@@ -40,26 +67,24 @@ func main() {
 		zap.L().Error("Send Status interval config error")
 		return
 	}
-	basic := common.NewBasic()
+	SetupCloseHandler()
+	basic = common.NewBasic()
 	basic.Start()
-	defer basic.Stop()
-	netSpeed := common.NewNetSpeed()
+	netSpeed = common.NewNetSpeed()
 	netSpeed.Start()
-	defer netSpeed.Stop()
 	if models.IsOpen == true {
 		common.PingValue.IpStatus = false
-		p10086 := common.NewPing()
-		defer p10086.Stop()
+		p10086 = common.NewPing()
 		p10086.RunCM()
-		p10010 := common.NewPing()
-		defer p10010.Stop()
+		p10010 = common.NewPing()
 		p10010.RunCU()
-		p189 := common.NewPing()
-		defer p189.Stop()
+		p189 = common.NewPing()
 		p189.RunCT()
 	}
 	Login()
 	if errCode == 0 && errMsg == "" && token != "" {
+		zap.L().Info("Sleep for waiting 5 seconds...")
+		time.Sleep(time.Duration(5) * time.Second)
 		SendStatus()
 	} else {
 		zap.L().Error("Get auth token error, exiting now")
@@ -68,8 +93,11 @@ func main() {
 	ticker := time.NewTicker(time.Duration(interval) * time.Minute)
 	for range ticker.C {
 	StartHere:
-		if (errCode == 20201 || errMsg == "ErrValidation") || (errCode == 20203 && errMsg == "ErrTokenExpired") {
+		if (errCode == 20201 && errMsg == "ErrValidation") || (errCode == 20203 && errMsg == "ErrTokenExpired") {
+			zap.L().Info("Validation token expired, need to re-login")
 			Login()
+			zap.L().Info("Sleep for waiting 5 seconds...")
+			time.Sleep(time.Duration(5) * time.Second)
 			goto StartHere
 		} else if errCode != 0 && errMsg != "" {
 			return
@@ -125,7 +153,7 @@ func SendStatus() {
 	jsonData := saveStatusResponse.(map[string]interface{})
 	errCode = int(jsonData["error"].(float64))
 	errMsg = jsonData["error_msg"].(string)
-	if (errCode == 20201 || errMsg == "ErrValidation") || (errCode == 20203 && errMsg == "ErrTokenExpired") {
+	if (errCode == 20201 && errMsg == "ErrValidation") || (errCode == 20203 && errMsg == "ErrTokenExpired") {
 		zap.L().Error("Token Validation Error: " + errMsg)
 		token = ""
 		return
