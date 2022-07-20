@@ -68,6 +68,7 @@ func main() {
 		return
 	}
 	SetupCloseHandler()
+	models.SetConfig()
 	basic = common.NewBasic()
 	basic.Start()
 	netSpeed = common.NewNetSpeed()
