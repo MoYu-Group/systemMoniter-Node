@@ -5,9 +5,10 @@ package common
 
 import (
 	"os/exec"
+	"regexp"
 	"strconv"
-	"strings"
-	"systemMoniter-Server/common"
+
+	"go.uber.org/zap"
 )
 
 func tupd() {
@@ -17,7 +18,7 @@ func tupd() {
 		zap.L().Error("Get TCP count error:", zap.Error(err))
 		//fmt.Println(time.Now().Format("2006-01-02 15:04:05")," Get TCP count error:",err)
 	} else {
-		result := bytes2str(byte1)
+		result := Bytes2str(byte1)
 		pattern := regexp.MustCompile(`[0-9]+`)
 		strmatch := pattern.FindStringSubmatch(result)
 
@@ -37,7 +38,7 @@ func tupd() {
 		zap.L().Error("Get UDP count error:", zap.Error(err))
 		//fmt.Println(time.Now().Format("2006-01-02 15:04:05")," Get UDP count error:",err)
 	} else {
-		result := bytes2str(byte2)
+		result := Bytes2str(byte2)
 		pattern := regexp.MustCompile(`[0-9]+`)
 		strmatch := pattern.FindString(result)
 
@@ -57,7 +58,7 @@ func tupd() {
 		zap.L().Error("Get process count error:", zap.Error(err))
 		//fmt.Println(time.Now().Format("2006-01-02 15:04:05")," Get process count error:",err)
 	} else {
-		result := bytes2str(byte3)
+		result := Bytes2str(byte3)
 		pattern := regexp.MustCompile(`[0-9]+`)
 		strmatch := pattern.FindString(result)
 
@@ -77,7 +78,7 @@ func tupd() {
 		zap.L().Error("Get threads count error:", zap.Error(err))
 		//fmt.Println(time.Now().Format("2006-01-02 15:04:05")," Get threads count error:",err)
 	} else {
-		result := bytes2str(byte4)
+		result := Bytes2str(byte4)
 		pattern := regexp.MustCompile(`[0-9]+`)
 		strmatch := pattern.FindString(result)
 
