@@ -223,10 +223,10 @@ func SetStatus(status *models.Status, nodeData *models.NodeData) {
 	status.Load15 = common.GetBasic.Load15
 	status.ThreadCount = common.GetBasic.Thread
 	status.ProcessCount = common.GetBasic.Process
-	status.NetworkTx = common.GetNetSpeed.Avgtx
-	status.NetworkRx = common.GetNetSpeed.Avgrx
-	status.NetworkIn = uint64(common.GetNetSpeed.Nettx)
-	status.NetworkOut = uint64(common.GetNetSpeed.Netrx)
+	status.NetworkTx = uint64(common.GetNetSpeed.Nettx)
+	status.NetworkRx = uint64(common.GetNetSpeed.Netrx)
+	status.NetworkIn = common.GetBasic.NetworkIn
+	status.NetworkOut = common.GetBasic.NetworkOut
 	status.Ping10010 = common.PingValue.Ping10010
 	status.Ping10086 = common.PingValue.Ping10086
 	status.Ping189 = common.PingValue.Ping189
