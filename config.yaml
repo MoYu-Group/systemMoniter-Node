@@ -13,7 +13,7 @@ log:
 sendInterval: 30 #储存采样速度，秒
 network: # 服务器端三网 ping 测试
   cu: "120.52.99.224"
-  ct: "183.78.182.66"
+  ct: "49.7.14.225"
   cm: "211.139.145.129"
   port: "80"
   interval: 1 # ping 三网时间，0 为禁ping，秒

@@ -2,7 +2,6 @@ package common
 
 import (
 	"net"
-	"strconv"
 	"sync"
 	"systemMoniter-Node/models"
 	"time"
@@ -69,7 +68,7 @@ func (ping *Ping) RunCU() {
 			case <-t.C:
 				ping.mtx.Lock()
 				t := time.Now()
-				url := models.Cu + ":" + strconv.Itoa(models.Porbeport)
+				url := models.Cu
 				conn, err := net.DialTimeout("tcp", url, defaulttimeout)
 				if err != nil {
 					//zap.L().Error("Error try to connect China Unicom :", zap.Error(err))
@@ -141,7 +140,7 @@ func (ping *Ping) RunCT() {
 			case <-t.C:
 				ping.mtx.Lock()
 				t := time.Now()
-				url := models.Ct + ":" + strconv.Itoa(models.Porbeport)
+				url := models.Ct
 				conn, err := net.DialTimeout("tcp", url, defaulttimeout)
 				if err != nil {
 					//zap.L().Error("Error try to connect China telecom :", zap.Error(err))
@@ -213,7 +212,7 @@ func (ping *Ping) RunCM() {
 			case <-t.C:
 				ping.mtx.Lock()
 				t := time.Now()
-				url := models.Cm + ":" + strconv.Itoa(models.Porbeport)
+				url := models.Cm
 				conn, err := net.DialTimeout("tcp", url, defaulttimeout)
 				if err != nil {
 					//zap.L().Error("Error try to connect China mobile :", zap.Error(err))

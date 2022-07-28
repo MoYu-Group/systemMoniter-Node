@@ -23,6 +23,7 @@ func tupd() {
 			zap.L().Error("Get TCP count error:", zap.Error(err))
 			//fmt.Println(time.Now().Format("2006-01-02 15:04:05")," zGet TCP count error:",err)
 		}
+		cmd.Process.Kill()
 		result := Bytes2str(byte1)
 		pattern := regexp.MustCompile(`[0-9]+`)
 		strmatch := pattern.FindString(result)
@@ -48,6 +49,7 @@ func tupd() {
 			zap.L().Error("Get TCP count error:", zap.Error(err))
 			//fmt.Println(time.Now().Format("2006-01-02 15:04:05")," zGet TCP count error:",err)
 		}
+		cmd.Process.Kill()
 		result := Bytes2str(byte2)
 		pattern := regexp.MustCompile(`[0-9]+`)
 		strmatch := pattern.FindString(result)
